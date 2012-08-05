@@ -1,0 +1,13 @@
+<tpconf size="32">
+	<autotile>
+		<tile name="G_Water01">graphics/autotiles/001-G_Water01.png</tile>
+		<tile name="G_Shadow01">graphics/autotiles/002-G_Shadow01.png</tile>
+		<tile name="G_Ground01">graphics/autotiles/003-G_Ground01.png</tile>
+		<tile name="G_Ground02">graphics/autotiles/004-G_Ground02.png</tile>
+		<tile name="G_Road01">graphics/autotiles/005-G_Road01.png</tile>
+		<tile name="G_Road02">graphics/autotiles/006-G_Road02.png</tile>
+		<tile name="G_Undulation01">graphics/autotiles/007-G_Undulation01.png</tile>
+		<tile name="G_Undulation02">graphics/autotiles/008-G_Undulation02.png</tile>
+	</autotile>
+	<tileset name="PostTown01">graphics/tilesets/013-PostTown01.png</tileset>
+</tpconf>
