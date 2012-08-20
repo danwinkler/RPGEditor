@@ -1,18 +1,16 @@
 package com.danwink.java.rpgeditor;
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.io.File;
-
 import javax.swing.JPanel;
 
 import com.danwink.java.rpg.Map;
-import com.danwink.java.rpg.MapFileHelper;
-import com.danwink.java.rpgeditor.MapEditor.EditorTool;
+import com.danwink.java.rpg.Map.TileEvent;
 
 
 public class MapEditor extends JPanel implements MouseListener, MouseMotionListener
@@ -40,25 +38,32 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 	
 	public void paintComponent( Graphics gg )
 	{
-		 Graphics2D g = (Graphics2D)gg;
-		 g.setColor( Color.WHITE );
-		 g.fillRect( 0, 0, getWidth(), getHeight() );
-		 m.render( g );
-		 
-		 setAlpha( g, .5f );
-		 int[][] selected = tp.getSelected();
-		 for( int xx = Math.max( selectX, 0 ); xx < Math.min( selectX+selected.length, m.width ); xx++ )
-		 {
-			 for( int yy = Math.max( selectY, 0 ); yy < Math.min( selectY+selected[xx-selectX].length, m.height ); yy++ )
-			 {
-				 m.renderTile( g, xx, yy, selectedLayer, selected[xx-selectX][yy-selectY] ); 
-			 }
-		 }
-		 setAlpha( g, 1.0f );
-		 
-		 g.setColor( Color.BLACK );
-		 g.drawRect( -1, -1, m.width*m.tileSize + 2, m.height*m.tileSize + 2 );
-		 
+		Graphics2D g = (Graphics2D)gg;
+		g.setColor( Color.WHITE );
+		g.fillRect( 0, 0, getWidth(), getHeight() );
+		m.render( g, null );
+
+		setAlpha( g, .5f );
+		int[][] selected = tp.getSelected();
+		for( int xx = Math.max( selectX, 0 ); xx < Math.min( selectX+selected.length, m.width ); xx++ )
+		{
+			for( int yy = Math.max( selectY, 0 ); yy < Math.min( selectY+selected[xx-selectX].length, m.height ); yy++ )
+			{
+				m.renderTile( g, xx, yy, selectedLayer, selected[xx-selectX][yy-selectY] ); 
+			}
+		}
+		setAlpha( g, 1.0f );
+		
+		g.setColor( Color.black );
+		g.setFont( new Font( "Arial", Font.BOLD, 20 ) );
+		for( int i = 0; i < m.events.size(); i++ )
+		{
+			TileEvent te = m.events.get( i );
+			g.drawString( "E", te.x * m.tileSize + m.tileSize/2 - 6, te.y * m.tileSize +m. tileSize/2 + 8 );
+		}
+		
+		g.setColor( Color.BLACK );
+		g.drawRect( -1, -1, m.width*m.tileSize + 2, m.height*m.tileSize + 2 );
 	}
 	
 	private void setAlpha( Graphics2D g2, float alpha ) 

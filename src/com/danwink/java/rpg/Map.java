@@ -1,10 +1,10 @@
 package com.danwink.java.rpg;
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.HashMap;
+import com.danwink.java.rpg.MapObject.Face;
+import com.danwink.java.rpg.Tileset.TileInfo;
 
 
 
@@ -37,29 +37,41 @@ public class Map
 		this.autoTiles = ts.autoTiles;
 		this.tileset = ts.mainTile;
 		t = ts;
+		configFile = t.configFile;
 	}
 	
-	public void render( Graphics2D g )
+	public void render( Graphics2D g, ArrayList<MapObject> mos )
 	{
-		for( int y = 0; y < height; y++ )
+		for( int e = -5; e <= 5; e++ )
 		{
-			for( int x = 0; x < width; x++ )
+			for( int y = 0; y < height; y++ )
 			{
-				for( int i = 0; i < layers[x][y].length; i++ )
+				for( int x = 0; x < width; x++ )
 				{
-					int tile = layers[x][y][i];
-					renderTile( g, x, y, i, tile );
+					for( int i = 0; i < layers[x][y].length; i++ )
+					{
+						int tile = layers[x][y][i];
+						TileInfo ti = t.info.get( tile );
+						if( ti == null )
+						{
+							System.out.println( tile );
+							System.exit( 0 );
+						}
+						if( ti.elevation == e )
+						{
+							renderTile( g, x, y, i, tile );
+						}
+					}
 				}
 			}
-		}
-		
-		g.setColor( Color.black );
-		g.setFont( new Font( "Arial", Font.BOLD, 20 ) );
-		
-		for( int i = 0; i < events.size(); i++ )
-		{
-			TileEvent te = events.get( i );
-			g.drawString( "E", te.x * tileSize + tileSize/2 - 6, te.y * tileSize + tileSize/2 + 8 );
+			if( e == 0 )
+			{
+				for( int i = 0; i < mos.size(); i++ )
+				{
+					MapObject mo = mos.get( i );
+					mo.render( g );
+				}
+			}
 		}
 	}
 	
@@ -165,8 +177,27 @@ public class Map
 		}
 	}
 
-	public boolean canWalk( int x, int y )
+	public boolean canWalk( int sx, int sy, Face dir )
 	{
+		int x = sx + dir.x;
+		int y = sy + dir.y;
+		
+		if( x < 0 || y < 0 || x >= width || y >= height )
+			return false;
+		
+		
+		int layerCount = layers[0][0].length;
+		
+		for( int i = 0; i < layerCount; i++ )
+		{
+			TileInfo cti = t.info.get( layers[sx][sy][i] );
+			TileInfo ti = t.info.get( layers[x][y][i] );
+			if( !cti.exit[dir.tilesetDir] || !ti.enter[dir.getOpposite().tilesetDir] )
+			{
+				return false;
+			}
+		}
+		
 		return true;
 	}
 }

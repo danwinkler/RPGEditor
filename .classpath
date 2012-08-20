@@ -7,6 +7,7 @@
 	<classpathentry kind="lib" path="jaxen-1.1.4.jar"/>
 	<classpathentry kind="lib" path="JXTextPane.jar"/>
 	<classpathentry kind="lib" path="swingx-all-1.6.3.jar"/>
+	<classpathentry kind="lib" path="vecmath.jar"/>
 	<classpathentry kind="src" path="/dlib"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

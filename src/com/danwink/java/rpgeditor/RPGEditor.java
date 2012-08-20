@@ -56,6 +56,7 @@ public class RPGEditor
 	
 	String defTileConfig = "deftpconf.xml";
 	
+
 	public RPGEditor()
 	{
 		try
@@ -93,6 +94,8 @@ public class RPGEditor
 		fileMenu.add( new JMenuItem( newAction ) );
 		fileMenu.add( new JMenuItem( openAction ) );
 		fileMenu.add( new JMenuItem( saveAction ) );
+		fileMenu.addSeparator();
+		fileMenu.add( new JMenuItem( new SetTileConfigAction() ) );
 		
 		JMenu toolsMenu = new JMenu( "Tools" );
 		toolsMenu.setMnemonic( KeyEvent.VK_T );
@@ -254,10 +257,16 @@ public class RPGEditor
 			{
 				try {
 					ed.m = MapFileHelper.loadMap( new File( dir+f ) );
+					ed.m.setTileset( MapFileHelper.loadTileConfig( new File( "tileconfigs/" + ed.m.configFile ) ) );
 					tp.tileset = ed.m.t;
+					ed.repaint();
+					tp.repaint();
 				} catch ( DocumentException e1 ) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				} catch (IOException ex ) {
+					// TODO Auto-generated catch block
+					ex.printStackTrace();
 				}
 			}
 			fd.dispose();
@@ -286,6 +295,39 @@ public class RPGEditor
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				}
+			}
+			fd.dispose();
+		}
+	}
+	
+	class SetTileConfigAction extends AbstractAction
+	{
+		public SetTileConfigAction()
+		{
+			super( "Set Tile Config" );
+		}
+		
+		public void actionPerformed( ActionEvent e ) 
+		{
+			fd = new FileDialog( window, "Load Tile Config", FileDialog.LOAD );
+			fd.setVisible( true );
+			
+			String dir = fd.getDirectory();
+			String f = fd.getFile();
+			if( f != null && dir != null )
+			{
+				try {
+					ed.m.setTileset( MapFileHelper.loadTileConfig( new File( dir+f ) ) );
+					tp.tileset = ed.m.t;
+					tp.repaint();
+					ed.repaint();
+				} catch ( DocumentException e1 ) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException ex ) {
+					// TODO Auto-generated catch block
+					ex.printStackTrace();
 				}
 			}
 			fd.dispose();

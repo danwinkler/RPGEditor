@@ -8,6 +8,9 @@ public class MapObject
 {
 	public Map m;
 	public BufferedImage im;
+	public int xFrameSize;
+	public int yFrameSize;
+	
 	public int xTile;
 	public int yTile;
 	
@@ -16,7 +19,7 @@ public class MapObject
 	
 	public Face facing;
 	public int moveFrame = 0;
-	public int framePhase = 2;
+	public int framePhase = 4;
 	public int moveSpeed = 4;
 	public boolean moving;
 	
@@ -30,19 +33,25 @@ public class MapObject
 		this.xTile = x;
 		this.yTile = y;
 		this.im = im;
+		if( im != null )
+		{
+			xFrameSize = im.getWidth() / 4;
+			yFrameSize = im.getHeight() / 4;
+		}
 		xScreen = xTile * m.tileSize;
 		yScreen = yTile * m.tileSize;
+		facing = Face.SOUTH;
 	}
 	
 	public void move( Face dir )
 	{
 		if( !moving )
 		{
-			if( m.canWalk( xTile + dir.x, yTile + dir.y ) )
+			if( m.canWalk( xTile, yTile, dir ) )
 			{
-				facing = dir;
 				moving = true;
 			}
+			facing = dir;
 		}
 	}
 	
@@ -61,7 +70,6 @@ public class MapObject
 				xScreen = xTile * m.tileSize;
 				yScreen = yTile * m.tileSize;
 				moving = false;
-				moveFrame = 0;
 			}
 			else
 			{
@@ -73,30 +81,56 @@ public class MapObject
 				}
 			}
 		}
+		else
+		{
+			moveFrame = 0;
+		}
 	}
 	
 	public void render( Graphics2D g )
 	{
-		g.setColor( Color.BLACK );
-		g.drawRect( xScreen, yScreen, 3, 3 );
+		int xim = xFrameSize * moveFrame;
+		int yim = yFrameSize * facing.yFrame;
+		int xsc = xScreen - (xFrameSize - m.tileSize);
+		int ysc = yScreen - (yFrameSize - m.tileSize);
+		g.drawImage( im, 
+				xsc, ysc, 
+				xsc+xFrameSize, ysc+yFrameSize,
+				xim, yim, 
+				xim+xFrameSize, yim+yFrameSize, 
+				null );
 	}
 	
 	public static enum Face
 	{
-		NORTH( 0, -1, 3 ),
-		SOUTH( 0, 1, 0 ),
-		EAST( 1, 0, 2 ),
-		WEST( -1, 0, 1 );
+		NORTH( 0, -1, 3, 0 ),
+		SOUTH( 0, 1, 0, 2 ),
+		EAST( 1, 0, 2, 1 ),
+		WEST( -1, 0, 1, 3 );
 		
 		public int yFrame;
 		public int x;
 		public int y;
+		public int tilesetDir;
 		
-		Face( int x, int y, int yFrame )
+		Face( int x, int y, int yFrame, int tilesetDir )
 		{
 			this.x = x;
 			this.y = y;
 			this.yFrame = yFrame;
+			this.tilesetDir = tilesetDir;
+		}
+		
+		public Face getOpposite()
+		{
+			switch( this )
+			{
+			case NORTH: return SOUTH;
+			case SOUTH: return NORTH;
+			case EAST: return WEST;
+			case WEST: return EAST;
+			}
+			return null;
 		}
 	}
 }

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -14,6 +16,7 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 import com.danwink.java.rpg.Map.TileEvent;
+import com.danwink.java.rpg.Tileset.TileInfo;
 import com.phyloa.dlib.util.DFile;
 
 public class MapFileHelper 
@@ -26,6 +29,7 @@ public class MapFileHelper
 		List<? extends Node> layers = doc.selectNodes( "//map/layers/layer" );
 		Map m = new Map( Integer.parseInt( map.valueOf( "@width" ) ), Integer.parseInt( map.valueOf( "@height" ) ), layers.size() );
 		m.configFile = map.valueOf( "@config" );
+		m.name = file.getName();
 		
 		//Load layers
 		for( int i = 0; i < layers.size(); i++ )
@@ -48,13 +52,6 @@ public class MapFileHelper
 			TileEvent te = new TileEvent( Integer.parseInt( n.valueOf( "@x" ) ), Integer.parseInt( n.valueOf( "@y" ) ) );
 			te.code = n.getText();
 			m.events.add( te );
-		}
-		
-		//Load onload
-		Node n = doc.selectSingleNode( "//map/onload" );
-		if( n != null )
-		{
-			m.onLoadCode = n.getText();
 		}
 		
 		return m;
@@ -96,13 +93,6 @@ public class MapFileHelper
 			event.setText( te.code );
 		}
 		
-		//ADD onload
-		if( m.onLoadCode != null )
-		{
-			Element onload = map.addElement( "onload" );
-			onload.setText( m.onLoadCode );
-		}
-		
 		XMLWriter writer = new XMLWriter(
 	            new FileWriter( file )
 	        );
@@ -124,12 +114,72 @@ public class MapFileHelper
 		
 		for( Node n : autotiles )
 		{
-			tc.autoTiles.add( DFile.loadImage( n.getText() ) );
+			tc.autoTiles.add( DFile.loadImage( "graphics/autotiles/" + n.getText() ) );
+			tc.autoTileFiles.add( n.getText() );
 		}
 		
 		Node tileSet = document.selectSingleNode( "//tpconf/tileset" );
-		tc.mainTile = DFile.loadImage( tileSet.getText() );
-		tc.configFile = file;
+		tc.mainTile = DFile.loadImage( "graphics/tilesets/" + tileSet.getText() );
+		tc.mainTileFile = tileSet.getText();
+		tc.configFile = file.getName();
+		
+		List<? extends Node> tileinfo = document.selectNodes( "//tpconf/tileinfo/tile" );
+		
+		tc.info.clear();
+		
+		for( Node n : tileinfo )
+		{
+			TileInfo ti = tc.new TileInfo( Integer.valueOf( n.valueOf( "@id" ) ) );
+			ti.elevation = Integer.parseInt( n.selectSingleNode( "elevation" ).getText() );
+			String[] enterS = n.selectSingleNode( "enter" ).getText().split( "," );
+			for( int i = 0; i < enterS.length; i++ )
+			{
+				ti.enter[i] = Boolean.parseBoolean( enterS[i].trim() );
+			}
+			
+			String[] exitS = n.selectSingleNode( "exit" ).getText().split( "," );
+			for( int i = 0; i < exitS.length; i++ )
+			{
+				ti.exit[i] = Boolean.parseBoolean( exitS[i].trim() );
+			}
+			tc.info.put( ti.tile, ti );
+		}
+		
 		return tc;
+	}
+	
+	public static void saveTileConfig( File file, Tileset t ) throws IOException
+	{
+		Document doc = DocumentHelper.createDocument();
+		Element tpconf = doc.addElement( "tpconf" );
+		Element autotiles = tpconf.addElement( "autotile" );
+		for( int i = 0; i < t.autoTileFiles.size(); i++ )
+		{
+			Element tile = autotiles.addElement( "tile" );
+			tile.setText( t.autoTileFiles.get( i ) );
+		}
+		
+		Element mainTile = tpconf.addElement( "tileset" );
+		mainTile.setText( t.mainTileFile );
+		
+		Element tileInfo = tpconf.addElement( "tileinfo" );
+		Set<Entry<Integer, TileInfo>> tileinfos = t.info.entrySet();
+		for( Entry<Integer, TileInfo> e : tileinfos )
+		{
+			int id = e.getKey();
+			TileInfo ti = e.getValue();
+			
+			Element tile = tileInfo.addElement( "tile" );
+			tile.addAttribute( "id", Integer.toString( id ) );
+			tile.addElement( "elevation" ).setText( Integer.toString( ti.elevation ) );
+			tile.addElement( "enter" ).setText( ti.enter[0] + "," + ti.enter[1] + "," + ti.enter[2] + "," + ti.enter[3] );
+			tile.addElement( "exit" ).setText( ti.exit[0] + "," + ti.exit[1] + "," + ti.exit[2] + "," + ti.exit[3] );
+		}
+		
+		XMLWriter writer = new XMLWriter(
+			new FileWriter( file )
+	    );
+	    writer.write( doc );
+	    writer.close();
 	}
 }
