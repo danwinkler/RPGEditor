@@ -3,6 +3,9 @@ package com.danwink.java.rpg;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+
+import com.danwink.java.rpg.MapObject.Face;
 
 public class MapObject 
 {
@@ -38,8 +41,11 @@ public class MapObject
 			xFrameSize = im.getWidth() / 4;
 			yFrameSize = im.getHeight() / 4;
 		}
-		xScreen = xTile * m.tileSize;
-		yScreen = yTile * m.tileSize;
+		if( m != null )
+		{
+			xScreen = xTile * m.tileSize;
+			yScreen = yTile * m.tileSize;
+		}
 		facing = Face.SOUTH;
 	}
 	
@@ -47,12 +53,26 @@ public class MapObject
 	{
 		if( !moving )
 		{
-			if( m.canWalk( xTile, yTile, dir ) )
+			if( this.facing != dir )
+			{
+				facing = dir;
+			}
+			else if( m.canWalk( xTile, yTile, dir ) )
 			{
 				moving = true;
 			}
 			facing = dir;
 		}
+	}
+	
+	public void teleport( Map m, int x, int y, Face dir )
+	{
+		this.m = m;
+		this.xTile = x;
+		this.yTile = y;
+		this.xScreen = xTile * m.tileSize;
+		this.yScreen = yTile * m.tileSize;
+		this.facing = dir;
 	}
 	
 	public void update( int frame )
@@ -70,6 +90,7 @@ public class MapObject
 				xScreen = xTile * m.tileSize;
 				yScreen = yTile * m.tileSize;
 				moving = false;
+				arrived();
 			}
 			else
 			{
@@ -131,6 +152,39 @@ public class MapObject
 			case WEST: return EAST;
 			}
 			return null;
+		}
+
+		public static Face getByName( String face ) {
+			face = face.trim().toLowerCase();
+			if( face.equals( "north" ) )
+				return NORTH;
+			else if( face.equals( "south" ) )
+				return SOUTH;
+			else if( face.equals( "east" ) )
+				return EAST;
+			else if( face.equals( "west" ) )
+				return WEST;
+			return null;
+		}
+	}
+	
+	public interface TileArriveListener
+	{
+		public void onMapObjectArrive( MapObject mo );
+	}
+	
+	private ArrayList<TileArriveListener> tals = new ArrayList<TileArriveListener>();
+	
+	public void addTileArriveListener( TileArriveListener tal )
+	{
+		tals.add( tal );
+	}
+	
+	private void arrived()
+	{
+		for( TileArriveListener tal : tals )
+		{
+			tal.onMapObjectArrive( this );
 		}
 	}
 }

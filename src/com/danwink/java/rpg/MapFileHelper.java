@@ -30,6 +30,10 @@ public class MapFileHelper
 		Map m = new Map( Integer.parseInt( map.valueOf( "@width" ) ), Integer.parseInt( map.valueOf( "@height" ) ), layers.size() );
 		m.configFile = map.valueOf( "@config" );
 		m.name = file.getName();
+		if( m.name.endsWith( ".xml" ) )
+		{
+			m.name = m.name.substring( 0, m.name.length()-4 );
+		}
 		
 		//Load layers
 		for( int i = 0; i < layers.size(); i++ )

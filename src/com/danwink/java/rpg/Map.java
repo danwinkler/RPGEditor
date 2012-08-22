@@ -64,7 +64,7 @@ public class Map
 					}
 				}
 			}
-			if( e == 0 )
+			if( e == 0 && mos != null )
 			{
 				for( int i = 0; i < mos.size(); i++ )
 				{
@@ -86,6 +86,18 @@ public class Map
 		{
 			autoTileState[i] = (autoTileState[i]+1) % ((autoTiles.get( i ).getWidth() / (tileSize*3)));
 		}
+	}
+	
+	public TileEvent getEvent( int x, int y )
+	{
+		for( TileEvent te : events )
+		{
+			if( te.x == x && te.y == y )
+			{
+				return te;
+			}
+		}
+		return null;
 	}
 	
 	public void renderTile( Graphics2D g, int x, int y, int layer, int tile )
