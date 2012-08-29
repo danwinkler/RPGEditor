@@ -52,7 +52,7 @@ public class EventEditorDialog implements ActionListener
 		ev = ed.ed.m.getTileEvent( ed.ed.selectX, ed.ed.selectY );
 		if( ev == null )
 		{
-			ev = new TileEvent( ed.ed.selectX, ed.ed.selectY );
+			ev = ed.ed.m.new TileEvent( ed.ed.selectX, ed.ed.selectY );
 			ed.ed.m.addTileEvent( ev );
 		}
 		codePane.setText( ev.code );

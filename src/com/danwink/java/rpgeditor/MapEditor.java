@@ -59,7 +59,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 		for( int i = 0; i < m.events.size(); i++ )
 		{
 			TileEvent te = m.events.get( i );
-			g.drawString( "E", te.x * m.tileSize + m.tileSize/2 - 6, te.y * m.tileSize +m. tileSize/2 + 8 );
+			g.drawString( "E", te.xTile * m.tileSize + m.tileSize/2 - 6, te.yTile * m.tileSize +m. tileSize/2 + 8 );
 		}
 		
 		g.setColor( Color.BLACK );

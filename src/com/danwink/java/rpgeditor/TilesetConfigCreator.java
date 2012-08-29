@@ -43,6 +43,7 @@ public class TilesetConfigCreator
 	JToggleButton elevationMode;
 	JToggleButton enterMode;
 	JToggleButton exitMode;
+	JToggleButton lightMode;
 	JButton save;
 	JButton cancel;
 	
@@ -65,11 +66,13 @@ public class TilesetConfigCreator
 		elevationMode = new JToggleButton( new SetElevationMode() );
 		enterMode = new JToggleButton( new SetEnterMode() );
 		exitMode = new JToggleButton( new SetExitMode() );
+		lightMode = new JToggleButton( new SetLightMode() );
 		
 		ButtonGroup bg = new ButtonGroup();
 		bg.add( elevationMode );
 		bg.add( enterMode );
 		bg.add( exitMode );
+		bg.add( lightMode );
 		
 		cancel = new JButton( "Exit" );
 		
@@ -79,7 +82,8 @@ public class TilesetConfigCreator
 		dialog.add( loadAutotile );
 		dialog.add( elevationMode );
 		dialog.add( enterMode );
-		dialog.add( exitMode, "wrap" );
+		dialog.add( exitMode );
+		dialog.add( lightMode, "wrap" );
 		
 		tep = new TilesetEditorPane();
 		scroll = new JScrollPane( tep );
@@ -138,6 +142,8 @@ public class TilesetConfigCreator
 						case EXIT:
 							ti.drawExit( g );
 							break;
+						case LIGHT:
+							ti.drawLight( g );
 						}
 						g.setTransform( at );
 					}
@@ -166,8 +172,14 @@ public class TilesetConfigCreator
 			int yTile = e.getY() / t.tileSize;
 			
 			int tile = t.getTile( xTile, yTile );
-			
-			if( editMode == TCCMode.ELEVATION )
+			if( editMode == TCCMode.LIGHT )
+			{
+				TileInfo ti = t.info.get( tile );
+				ti.light = !ti.light;
+				repaint();
+				return;
+			}
+			else if( editMode == TCCMode.ELEVATION )
 			{
 				if( e.getButton() == MouseEvent.BUTTON1 )
 				{
@@ -316,6 +328,20 @@ public class TilesetConfigCreator
 		}
 	}
 	
+	class SetLightMode extends AbstractAction
+	{
+		public SetLightMode()
+		{
+			super( "Light Mode" );
+		}
+		
+		public void actionPerformed( ActionEvent e )
+		{
+			editMode = TCCMode.LIGHT;
+			tep.repaint();
+		}
+	}
+	
 	class SaveConfig extends AbstractAction
 	{
 		public SaveConfig()
@@ -377,6 +403,7 @@ public class TilesetConfigCreator
 	enum TCCMode {
 		ELEVATION,
 		ENTER,
-		EXIT;
+		EXIT,
+		LIGHT;
 	}
 }

@@ -111,6 +111,10 @@ public class Tileset
 		public int elevation;
 		public boolean[] enter; //NESW
 		public boolean[] exit; //NESW
+		public boolean light;
+		public int lr = 255;
+		public int lg = 255;
+		public int lb = 255;
 		
 		public TileInfo( int tile )
 		{
@@ -186,6 +190,20 @@ public class Tileset
 			g.translate( tileSize/2 - 8, tileSize/2 + 8 );
 			g.scale( 2, 2 );
 			g.drawString( "" + elevation, 0, 0 );
+			
+			g.setTransform( at );
+		}
+		
+		public void drawLight( Graphics2D g ) 
+		{
+			AffineTransform at = g.getTransform();
+			g.setColor( Color.BLACK );
+			g.drawRect( 6, 6, tileSize-12, tileSize-12 );
+			if( light )
+			{
+				g.setColor( new Color( lr, lg, lb ) );
+				g.fillRect( 6, 6, tileSize-12, tileSize-12 );
+			}
 			
 			g.setTransform( at );
 		}

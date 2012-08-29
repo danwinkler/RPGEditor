@@ -1,10 +1,13 @@
 package com.danwink.java.rpg;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import com.danwink.java.rpg.MapObject.Face;
 import com.danwink.java.rpg.Tileset.TileInfo;
+import com.phyloa.dlib.util.DGraphics;
 
 
 
@@ -22,6 +25,8 @@ public class Map
 	public int tilesAcross = 8;
 	public String onLoadCode;
 	public String name;
+	
+	BufferedImage nightOverlay;
 	
 	public Tileset t;
 	
@@ -41,6 +46,11 @@ public class Map
 	}
 	
 	public void render( Graphics2D g, ArrayList<MapObject> mos )
+	{
+		render( g, mos, false );
+	}
+	
+	public void render( Graphics2D g, ArrayList<MapObject> mos, boolean night )
 	{
 		for( int e = -5; e <= 5; e++ )
 		{
@@ -73,8 +83,55 @@ public class Map
 				}
 			}
 		}
+		if( night )
+		{
+			if( nightOverlay == null )
+			{
+				buildNightOverlay();
+			}
+			g.drawImage( nightOverlay, 0, 0, null );
+		}
 	}
 	
+	private void buildNightOverlay() 
+	{
+		nightOverlay = DGraphics.createBufferedImage( width * tileSize, height * tileSize );
+		Graphics2D g = nightOverlay.createGraphics();
+		g.setBackground( new Color( 0, 0, 0, 200 ) );
+		g.clearRect( 0, 0, nightOverlay.getWidth(), nightOverlay.getHeight() );
+		
+		for( int y = 0; y < height; y++ )
+		{
+			for( int x = 0; x < width; x++ )
+			{
+				for( int i = 0; i < layers[x][y].length; i++ )
+				{
+					TileInfo ti = t.info.get( layers[x][y][i] );
+					if( ti.light )
+					{
+						for( int yy = Math.max( y*tileSize+(tileSize/2)-(10*tileSize), 0 ); yy < Math.min( y*tileSize+(tileSize/2)+(10*tileSize), nightOverlay.getHeight() ); yy++ )
+						{
+							for( int xx = Math.max( x*tileSize+(tileSize/2)-(10*tileSize), 0 ); xx < Math.min( x*tileSize+(tileSize/2)+(10*tileSize), nightOverlay.getWidth() ); xx++ )
+							{
+								int dx = xx-(x*tileSize+(tileSize/2));
+								int dy = yy-(y*tileSize+(tileSize/2));
+								double dist = Math.sqrt( dx*dx + dy*dy );
+								dist /= tileSize;
+								int alpha = (int)Math.min( (dist / 8.0) * 255, 255 );
+								int calpha = DGraphics.getAlpha( nightOverlay.getRGB( xx, yy ) );
+								if( calpha > alpha )
+								{
+									nightOverlay.setRGB( xx, yy, DGraphics.rgba( 0, 0, 0, alpha ) );
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		g.dispose();
+	}
+
 	public void prepareAutoTilesState()
 	{
 		autoTileState = new int[autoTiles.size()];
@@ -92,7 +149,7 @@ public class Map
 	{
 		for( TileEvent te : events )
 		{
-			if( te.x == x && te.y == y )
+			if( te.xTile == x && te.yTile == y )
 			{
 				return te;
 			}
@@ -121,14 +178,14 @@ public class Map
 	{
 		g.translate( x*tileSize, y*tileSize );
 		AutoTileDrawer.draw( g, autoTiles.get( -autoTile - 1 ), tileSize, autoTileState == null ? 0 : autoTileState[-autoTile-1], 	
-																				getTile( x-1, y-1, layer ) == autoTile, 
-																				getTile( x, y-1, layer ) == autoTile, 
-																				getTile( x+1, y-1, layer ) == autoTile, 
-																				getTile( x-1, y, layer ) == autoTile, 
-																				getTile( x+1, y, layer ) == autoTile, 
-																				getTile( x-1, y+1, layer ) == autoTile, 
-																				getTile( x, y+1, layer ) == autoTile, 
-																				getTile( x+1, y+1, layer ) == autoTile 
+																				getTile( x-1, y-1, layer, autoTile ) == autoTile, 
+																				getTile( x, y-1, layer, autoTile ) == autoTile, 
+																				getTile( x+1, y-1, layer, autoTile ) == autoTile, 
+																				getTile( x-1, y, layer, autoTile ) == autoTile, 
+																				getTile( x+1, y, layer, autoTile ) == autoTile, 
+																				getTile( x-1, y+1, layer, autoTile ) == autoTile, 
+																				getTile( x, y+1, layer, autoTile ) == autoTile, 
+																				getTile( x+1, y+1, layer, autoTile ) == autoTile 
 							);
 		g.translate( -x*tileSize, -y*tileSize );
 	}
@@ -146,6 +203,15 @@ public class Map
 		if( x < 0 || x >= width || y < 0 || y >= height )
 		{
 			return Integer.MAX_VALUE;
+		}
+		return layers[x][y][layer];
+	}
+	
+	public int getTile( int x, int y, int layer, int def )
+	{
+		if( x < 0 || x >= width || y < 0 || y >= height )
+		{
+			return def;
 		}
 		return layers[x][y][layer];
 	}
@@ -170,22 +236,19 @@ public class Map
 	{
 		for( TileEvent t : events )
 		{
-			if( t.x == x && t.y == y )
+			if( t.xTile == x && t.yTile == y )
 				return t;
 		}
 		return null;
 	}
 	
-	public static class TileEvent
+	public class TileEvent extends MapObject
 	{
-		public int x;
-		public int y;
 		public String code;
 		
 		public TileEvent( int x, int y )
 		{
-			this.x = x;
-			this.y = y;
+			super( Map.this, null, x, y );
 		}
 	}
 

@@ -1,4 +1,5 @@
 package com.danwink.java.rpgeditor;
+import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.FileDialog;
 import java.awt.MenuItem;
@@ -259,6 +260,7 @@ public class RPGEditor
 					ed.m = MapFileHelper.loadMap( new File( dir+f ) );
 					ed.m.setTileset( MapFileHelper.loadTileConfig( new File( "tileconfigs/" + ed.m.configFile ) ) );
 					tp.tileset = ed.m.t;
+					ed.setPreferredSize( new Dimension( ed.m.width * ed.m.tileSize, ed.m.height * ed.m.tileSize ) );
 					ed.repaint();
 					tp.repaint();
 				} catch ( DocumentException e1 ) {
@@ -351,5 +353,6 @@ public class RPGEditor
 	{
 		ed.m = new Map( width, height, layers );
 		ed.m.setTileset( tp.tileset );
+		ed.setPreferredSize( new Dimension( ed.m.width * ed.m.tileSize, ed.m.height * ed.m.tileSize ) );
 	}
 }

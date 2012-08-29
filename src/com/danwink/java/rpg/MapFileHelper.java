@@ -53,7 +53,7 @@ public class MapFileHelper
 		List<? extends Node> events = doc.selectNodes( "//map/events/event" );
 		for( Node n : events )
 		{
-			TileEvent te = new TileEvent( Integer.parseInt( n.valueOf( "@x" ) ), Integer.parseInt( n.valueOf( "@y" ) ) );
+			TileEvent te = m.new TileEvent( Integer.parseInt( n.valueOf( "@x" ) ), Integer.parseInt( n.valueOf( "@y" ) ) );
 			te.code = n.getText();
 			m.events.add( te );
 		}
@@ -92,8 +92,8 @@ public class MapFileHelper
 		{
 			TileEvent te = m.events.get( i );
 			Element event = events.addElement( "event" );
-			event.addAttribute( "x", Integer.toString( te.x ) );
-			event.addAttribute( "y", Integer.toString( te.y ) );
+			event.addAttribute( "x", Integer.toString( te.xTile ) );
+			event.addAttribute( "y", Integer.toString( te.yTile ) );
 			event.setText( te.code );
 		}
 		
@@ -146,6 +146,16 @@ public class MapFileHelper
 			{
 				ti.exit[i] = Boolean.parseBoolean( exitS[i].trim() );
 			}
+			
+			Node lightNode = n.selectSingleNode( "light" );
+			if( lightNode != null )
+			{
+				String[] lightS = lightNode.getText().split( "," );
+				ti.light = true;
+				ti.lr = Integer.parseInt( lightS[0] );
+				ti.lg = Integer.parseInt( lightS[1] );
+				ti.lb = Integer.parseInt( lightS[2] );
+			}
 			tc.info.put( ti.tile, ti );
 		}
 		
@@ -178,6 +188,10 @@ public class MapFileHelper
 			tile.addElement( "elevation" ).setText( Integer.toString( ti.elevation ) );
 			tile.addElement( "enter" ).setText( ti.enter[0] + "," + ti.enter[1] + "," + ti.enter[2] + "," + ti.enter[3] );
 			tile.addElement( "exit" ).setText( ti.exit[0] + "," + ti.exit[1] + "," + ti.exit[2] + "," + ti.exit[3] );
+			if( ti.light )
+			{
+				tile.addElement( "light" ).setText( ti.lr + "," + ti.lg + "," + ti.lb );
+			}
 		}
 		
 		XMLWriter writer = new XMLWriter(
