@@ -29,24 +29,30 @@ public class MapObject
 	public boolean lockAnim = false;
 	public int lockAnimX;
 	public int lockAnimY;
+	public boolean passable = true;
 	
 	public MapObject( Map m, BufferedImage im, int x, int y )
 	{
 		this.m = m;
 		this.xTile = x;
 		this.yTile = y;
-		this.im = im;
-		if( im != null )
-		{
-			xFrameSize = im.getWidth() / 4;
-			yFrameSize = im.getHeight() / 4;
-		}
+		setImage( im );
 		if( m != null )
 		{
 			xScreen = xTile * m.tileSize;
 			yScreen = yTile * m.tileSize;
 		}
 		facing = Face.SOUTH;
+	}
+	
+	public void setImage( BufferedImage im )
+	{
+		this.im = im;
+		if( im != null )
+		{
+			xFrameSize = im.getWidth() / 4;
+			yFrameSize = im.getHeight() / 4;
+		}
 	}
 	
 	public void move( Face dir )
@@ -110,16 +116,19 @@ public class MapObject
 	
 	public void render( Graphics2D g )
 	{
-		int xim = xFrameSize * moveFrame;
-		int yim = yFrameSize * facing.yFrame;
-		int xsc = xScreen - (xFrameSize - m.tileSize);
-		int ysc = yScreen - (yFrameSize - m.tileSize);
-		g.drawImage( im, 
-				xsc, ysc, 
-				xsc+xFrameSize, ysc+yFrameSize,
-				xim, yim, 
-				xim+xFrameSize, yim+yFrameSize, 
-				null );
+		if( im != null )
+		{
+			int xim = xFrameSize * moveFrame;
+			int yim = yFrameSize * facing.yFrame;
+			int xsc = xScreen - (xFrameSize - m.tileSize);
+			int ysc = yScreen - (yFrameSize - m.tileSize);
+			g.drawImage( im, 
+					xsc, ysc, 
+					xsc+xFrameSize, ysc+yFrameSize,
+					xim, yim, 
+					xim+xFrameSize, yim+yFrameSize, 
+					null );
+		}
 	}
 	
 	public static enum Face

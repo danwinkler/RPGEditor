@@ -76,6 +76,11 @@ public class Map
 			}
 			if( e == 0 && mos != null )
 			{
+				for( int i = 0; i < events.size(); i++ )
+				{
+					MapObject mo = events.get( i );
+					mo.render( g );
+				}
 				for( int i = 0; i < mos.size(); i++ )
 				{
 					MapObject mo = mos.get( i );
@@ -250,6 +255,36 @@ public class Map
 		{
 			super( Map.this, null, x, y );
 		}
+
+		public void face( MapObject player )
+		{
+			if( player.xTile == xTile )
+			{
+				if( player.yTile > yTile )
+				{
+					facing = Face.SOUTH;
+				}
+				else
+				{
+					facing = Face.NORTH;
+				}
+			}
+			else if( player.yTile == yTile )
+			{
+				if( player.xTile > xTile )
+				{
+					facing = Face.EAST;
+				}
+				else
+				{
+					facing = Face.WEST;
+				}
+			}
+			else
+			{
+				facing = player.facing.getOpposite();
+			}
+		}
 	}
 
 	public boolean canWalk( int sx, int sy, Face dir )
@@ -273,6 +308,28 @@ public class Map
 			}
 		}
 		
+		for( int i = 0; i < events.size(); i++ )
+		{
+			TileEvent te = events.get( i );
+			if( te.xTile == x && te.yTile == y && !te.passable )
+			{
+				return false;
+			}
+		}
+		
 		return true;
+	}
+
+	public void update( int time, ArrayList<MapObject> mos )
+	{
+		for( int i = 0; i < mos.size(); i++ )
+		{
+			mos.get( i ).update( time );
+		}
+		
+		for( int i = 0; i < events.size(); i++ )
+		{
+			events.get( i ).update( time );
+		}
 	}
 }
