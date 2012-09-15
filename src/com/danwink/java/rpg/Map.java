@@ -43,6 +43,7 @@ public class Map
 		this.tileset = ts.mainTile;
 		t = ts;
 		configFile = t.configFile;
+		tileSize = t.tileSize;
 	}
 	
 	public void render( Graphics2D g, ArrayList<MapObject> mos )

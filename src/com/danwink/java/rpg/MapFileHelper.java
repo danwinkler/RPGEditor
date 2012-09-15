@@ -112,6 +112,10 @@ public class MapFileHelper
 		
 		document = reader.read( file );
 		
+		Node tpconf = document.selectSingleNode( "//tpconf" );
+		String tilesize = tpconf.valueOf( "@tilesize" );
+		tc.tileSize = tilesize.equals( "" ) ? 32 : Integer.parseInt( tilesize );
+		
 		List<? extends Node> autotiles = document.selectNodes( "//tpconf/autotile/tile" );
 		
 		tc.autoTiles.clear();
@@ -166,6 +170,7 @@ public class MapFileHelper
 	{
 		Document doc = DocumentHelper.createDocument();
 		Element tpconf = doc.addElement( "tpconf" );
+		tpconf.addAttribute( "tilesize", Integer.toString( t.tileSize ) );
 		Element autotiles = tpconf.addElement( "autotile" );
 		for( int i = 0; i < t.autoTileFiles.size(); i++ )
 		{

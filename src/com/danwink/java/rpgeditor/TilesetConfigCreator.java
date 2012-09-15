@@ -53,6 +53,8 @@ public class TilesetConfigCreator
 	
 	LoadMainTileImage lmtiaction = new LoadMainTileImage();
 	
+	int scale = 1;
+	
 	public TilesetConfigCreator( RPGEditor rpged )
 	{
 		this.rpged = rpged;
@@ -240,9 +242,11 @@ public class TilesetConfigCreator
 				try {
 					t.mainTile = DFile.loadImage( dir+f );
 					t.mainTileFile = f;
-					tep.setPreferredSize( new Dimension( t.getWidth(), t.getHeight() ) );
-					scroll.repaint();
+					t.tileSize = t.mainTile.getWidth() / 8;
 					
+					scale = t.tileSize < 32 ? 2 : 1;
+					tep.setPreferredSize( new Dimension( t.getWidth() * scale, t.getHeight() * scale ) );
+					scroll.repaint();
 				} catch ( IOException e1 ) {
 					e1.printStackTrace();
 				}
