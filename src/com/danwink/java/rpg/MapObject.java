@@ -23,7 +23,7 @@ public class MapObject
 	public Face facing;
 	public int moveFrame = 0;
 	public int framePhase = 4;
-	public int moveSpeed = 4;
+	public int moveSpeed = 2;
 	public boolean moving;
 	
 	public boolean lockAnim = false;
@@ -111,6 +111,8 @@ public class MapObject
 		else
 		{
 			moveFrame = 0;
+			xScreen = xTile * m.tileSize;
+			yScreen = yTile * m.tileSize;
 		}
 	}
 	

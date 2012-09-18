@@ -29,6 +29,8 @@ public class TilePicker extends JPanel implements MouseListener, MouseMotionList
 	int pressX;
 	int pressY;
 	
+	int scale = 1;
+	
 	public TilePicker()
 	{
 		super( true );
@@ -41,8 +43,8 @@ public class TilePicker extends JPanel implements MouseListener, MouseMotionList
 	
 	public void paintComponent( Graphics gg )
 	{
-		int windowX = tileset.getWidth();
-		int windowY = tileset.getHeight();
+		int windowX = tileset.getWidth() * scale;
+		int windowY = tileset.getHeight() * scale;
 		if( windowX != getWidth() || windowY != getHeight() )
 		{
 			this.setPreferredSize( new Dimension( windowX, windowY ) );
@@ -54,7 +56,7 @@ public class TilePicker extends JPanel implements MouseListener, MouseMotionList
 		g.fillRect( 0, 0, getWidth(), getHeight() );
 		
 		g.translate( 2, 2 );
-		
+		g.scale( scale, scale );
 		tileset.render( g );
 		
 		g.setColor( Color.RED );
@@ -65,6 +67,14 @@ public class TilePicker extends JPanel implements MouseListener, MouseMotionList
 	public void setTileset( Tileset t )
 	{
 		this.tileset = t;
+		if( t.tileSize == 16 )
+		{
+			scale = 2;
+		}
+		else
+		{
+			scale = 1;
+		}
 	}
 
 	public void mouseClicked( MouseEvent e ) 
@@ -136,12 +146,12 @@ public class TilePicker extends JPanel implements MouseListener, MouseMotionList
 	
 	public int xMouseToTile( int x )
 	{
-		return DMath.bound( (x-2) / tileset.tileSize, 0, tileset.tilesAcross );
+		return DMath.bound( ((x/scale)-2) / tileset.tileSize, 0, tileset.tilesAcross );
 	}
 	
 	public int yMouseToTile( int y )
 	{
-		return (y-2) / tileset.tileSize;
+		return ((y/scale)-2) / tileset.tileSize;
 	}
 
 	public int[][] getSelected() 

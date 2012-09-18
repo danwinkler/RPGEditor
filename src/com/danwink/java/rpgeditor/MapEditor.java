@@ -1,6 +1,7 @@
 package com.danwink.java.rpgeditor;
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -11,6 +12,8 @@ import javax.swing.JPanel;
 
 import com.danwink.java.rpg.Map;
 import com.danwink.java.rpg.Map.TileEvent;
+import com.danwink.java.rpg.Tileset;
+import com.phyloa.dlib.util.DMath;
 
 
 public class MapEditor extends JPanel implements MouseListener, MouseMotionListener
@@ -25,6 +28,8 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 	public EditorTool tool = EditorTool.PENCIL;
 	private boolean dragDrawing = false;
 	
+	int scale = 1;
+	
 	public MapEditor( RPGEditor rpged )
 	{
 		super( true );
@@ -34,6 +39,14 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 		this.rpged = rpged;
 		this.tp = rpged.tp;
 		m.setTileset( tp.tileset );
+		if( tp.tileset.tileSize == 16 )
+		{
+			scale = 2;
+		}
+		else
+		{
+			scale = 1;
+		}
 	}
 	
 	public void paintComponent( Graphics gg )
@@ -41,6 +54,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 		Graphics2D g = (Graphics2D)gg;
 		g.setColor( Color.WHITE );
 		g.fillRect( 0, 0, getWidth(), getHeight() );
+		g.scale( scale, scale );
 		m.render( g, null );
 
 		setAlpha( g, .5f );
@@ -96,8 +110,8 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 	{
 		if( e.getButton() == MouseEvent.BUTTON1 )
 		{
-			selectX = e.getX() / m.tileSize;
-			selectY = e.getY() / m.tileSize;
+			selectX = xMouseToTile( e.getX() );
+			selectY = yMouseToTile( e.getY() );
 			m.setTiles( selectX, selectY, selectedLayer, tp.getSelected() );
 			repaint();
 			dragDrawing  = true;
@@ -120,8 +134,8 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 	{
 		if( dragDrawing )
 		{
-			selectX = e.getX() / m.tileSize;
-			selectY = e.getY() / m.tileSize;
+			selectX = xMouseToTile( e.getX() );
+			selectY = yMouseToTile( e.getY() );
 			m.setTiles( selectX, selectY, selectedLayer, tp.getSelected() );
 			repaint();
 		}
@@ -130,9 +144,19 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 	@Override
 	public void mouseMoved( MouseEvent e ) 
 	{
-		selectX = e.getX() / m.tileSize;
-		selectY = e.getY() / m.tileSize;
+		selectX = xMouseToTile( e.getX() );
+		selectY = yMouseToTile( e.getY() );
 		repaint();
+	}
+	
+	public int xMouseToTile( int x )
+	{
+		return (x/scale) / m.tileSize;
+	}
+	
+	public int yMouseToTile( int y )
+	{
+		return (y/scale) / m.tileSize;
 	}
 	
 	public static enum EditorTool
@@ -140,5 +164,20 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 		PENCIL,
 		FILL,
 		BOX
+	}
+
+	public void setTileset( Tileset tileset )
+	{
+		m.setTileset( tileset );
+		if( tileset.tileSize == 16 )
+		{
+			scale = 2;
+		}
+		else
+		{
+			scale = 1;
+		}
+		setPreferredSize( new Dimension( m.width * m.tileSize * scale, m.height * m.tileSize * scale ) );
+		repaint();
 	}
 }

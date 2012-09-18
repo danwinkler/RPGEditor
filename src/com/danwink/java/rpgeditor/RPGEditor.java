@@ -320,8 +320,8 @@ public class RPGEditor
 			if( f != null && dir != null )
 			{
 				try {
-					ed.m.setTileset( MapFileHelper.loadTileConfig( new File( dir+f ) ) );
-					tp.tileset = ed.m.t;
+					ed.setTileset( MapFileHelper.loadTileConfig( new File( dir+f ) ) );
+					tp.setTileset( ed.m.t );
 					tp.repaint();
 					ed.repaint();
 				} catch ( DocumentException e1 ) {
@@ -352,7 +352,6 @@ public class RPGEditor
 	public void newMap( int width, int height, int layers )
 	{
 		ed.m = new Map( width, height, layers );
-		ed.m.setTileset( tp.tileset );
-		ed.setPreferredSize( new Dimension( ed.m.width * ed.m.tileSize, ed.m.height * ed.m.tileSize ) );
+		ed.setTileset( tp.tileset );
 	}
 }
