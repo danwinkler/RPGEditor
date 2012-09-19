@@ -258,8 +258,8 @@ public class RPGEditor
 			{
 				try {
 					ed.m = MapFileHelper.loadMap( new File( dir+f ) );
-					ed.m.setTileset( MapFileHelper.loadTileConfig( new File( "tileconfigs/" + ed.m.configFile ) ) );
-					tp.tileset = ed.m.t;
+					ed.setTileset( MapFileHelper.loadTileConfig( new File( "tileconfigs/" + ed.m.configFile ) ) );
+					tp.setTileset( ed.m.t );
 					ed.setPreferredSize( new Dimension( ed.m.width * ed.m.tileSize, ed.m.height * ed.m.tileSize ) );
 					ed.repaint();
 					tp.repaint();
